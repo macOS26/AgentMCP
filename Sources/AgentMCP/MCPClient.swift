@@ -173,6 +173,8 @@ public actor MCPClient {
     private var connections: [UUID: any MCPConnection] = [:]
     private var configs: [UUID: ServerConfig] = [:]
     private var discoveredTools: [UUID: [DiscoveredTool]] = [:]
+    /// O(1) tool lookup by tool UUID
+    private var toolsByID: [UUID: DiscoveredTool] = [:]
     private var discoveredResources: [UUID: [DiscoveredResource]] = [:]
     private var errors: [UUID: String] = [:]
 
@@ -245,6 +247,8 @@ public actor MCPClient {
         connections[serverId]?.disconnect()
         connections.removeValue(forKey: serverId)
         configs.removeValue(forKey: serverId)
+        // Remove tools from O(1) cache before removing from per-server list
+        for tool in discoveredTools[serverId] ?? [] { toolsByID.removeValue(forKey: tool.id) }
         discoveredTools.removeValue(forKey: serverId)
         discoveredResources.removeValue(forKey: serverId)
         errors.removeValue(forKey: serverId)
@@ -278,6 +282,7 @@ public actor MCPClient {
         guard connection.isAlive else {
             connections.removeValue(forKey: serverId)
             configs.removeValue(forKey: serverId)
+            for tool in discoveredTools[serverId] ?? [] { toolsByID.removeValue(forKey: tool.id) }
             discoveredTools.removeValue(forKey: serverId)
             throw MCPClientError.connectionFailed("Server process is no longer running")
         }
@@ -334,7 +339,7 @@ public actor MCPClient {
     }
 
     public func callTool(toolId: UUID, arguments: [String: JSONValue] = [:]) async throws -> ToolResult {
-        guard let tool = getAllTools().first(where: { $0.id == toolId }) else {
+        guard let tool = toolsByID[toolId] else {
             throw MCPClientError.toolNotFound(toolId)
         }
         return try await callTool(serverId: tool.serverId, name: tool.name, arguments: arguments)
@@ -470,6 +475,8 @@ public actor MCPClient {
                         return DiscoveredTool(serverId: serverId, serverName: serverName, name: name,
                                              description: String(description.prefix(2048)), inputSchemaJSON: schemaJSON)
                     }
+                    // Sync O(1) lookup cache
+                    for tool in discoveredTools[serverId] ?? [] { toolsByID[tool.id] = tool }
                 }
             } catch { discoveredTools[serverId] = [] }
         } else {
