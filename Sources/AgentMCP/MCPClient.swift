@@ -398,7 +398,10 @@ public actor MCPClient {
 
         var env = ProcessInfo.processInfo.environment
         // Always set HOME — sandboxed apps may not have it or may have wrong value
-        env["HOME"] = FileManager.default.homeDirectoryForCurrentUser.path
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        env["HOME"] = home.path
+        // Set cwd to HOME — tools like playwright-mcp create dirs relative to cwd
+        process.currentDirectoryURL = home
         // Ensure common tool paths are in PATH
         let extraPaths = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
         env["PATH"] = extraPaths + ":" + (env["PATH"] ?? "")
