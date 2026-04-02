@@ -397,10 +397,8 @@ public actor MCPClient {
         process.arguments = config.arguments
 
         var env = ProcessInfo.processInfo.environment
-        // Ensure HOME is always set — MCP servers need it for config/cache dirs
-        if env["HOME"] == nil {
-            env["HOME"] = FileManager.default.homeDirectoryForCurrentUser.path
-        }
+        // Always set HOME — sandboxed apps may not have it or may have wrong value
+        env["HOME"] = FileManager.default.homeDirectoryForCurrentUser.path
         // Ensure common tool paths are in PATH
         let extraPaths = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
         env["PATH"] = extraPaths + ":" + (env["PATH"] ?? "")
