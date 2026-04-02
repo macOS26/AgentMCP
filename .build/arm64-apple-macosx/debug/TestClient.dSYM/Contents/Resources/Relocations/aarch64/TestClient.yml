@@ -1,5 +1,0 @@
----
-triple:          'arm64-apple-darwin'
-binary-path:     '/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient'
-relocations:     []
-...

@@ -1,3 +1,0 @@
-module AgentMCPPackageTests {
-    header "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/include/AgentMCPPackageTests-Swift.h"
-}
