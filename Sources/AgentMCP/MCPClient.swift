@@ -397,6 +397,13 @@ public actor MCPClient {
         process.arguments = config.arguments
 
         var env = ProcessInfo.processInfo.environment
+        // Ensure HOME is always set — MCP servers need it for config/cache dirs
+        if env["HOME"] == nil {
+            env["HOME"] = FileManager.default.homeDirectoryForCurrentUser.path
+        }
+        // Ensure common tool paths are in PATH
+        let extraPaths = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        env["PATH"] = extraPaths + ":" + (env["PATH"] ?? "")
         for (key, value) in config.env {
             let upper = key.uppercased()
             if Self.blockedEnvVars.contains(upper) || upper.hasPrefix("DYLD_") {
