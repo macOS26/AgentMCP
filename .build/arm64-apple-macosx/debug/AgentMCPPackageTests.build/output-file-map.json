@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/primary.swiftdeps"
+  },
+  "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.derived/runner.swift": {
+    "dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/runner.d",
+    "object": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/runner.swift.o",
+    "swiftmodule": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/runner.swiftdeps",
+    "diagnostics": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/runner.dia"
+  }
+}

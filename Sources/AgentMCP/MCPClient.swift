@@ -389,14 +389,11 @@ public actor MCPClient {
         guard fm.fileExists(atPath: commandURL.path, isDirectory: &isDir), !isDir.boolValue else {
             throw MCPClientError.connectionFailed("Executable not found or is a directory: \(config.command)")
         }
-        let resolved = commandURL.resolvingSymlinksInPath().path
-        let originalResolved = URL(fileURLWithPath: config.command).standardizedFileURL.path
-        if resolved != originalResolved {
-            throw MCPClientError.connectionFailed("Refusing to execute symlink: \(config.command) → \(resolved)")
-        }
+        // Resolve symlinks — Homebrew uses symlinks for all binaries
+        let resolvedURL = commandURL.resolvingSymlinksInPath()
 
         let process = Process()
-        process.executableURL = commandURL
+        process.executableURL = resolvedURL
         process.arguments = config.arguments
 
         var env = ProcessInfo.processInfo.environment

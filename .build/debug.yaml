@@ -1,0 +1,168 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "AgentMCP-arm64-apple-macosx-debug.module": ["<AgentMCP-arm64-apple-macosx-debug.module>"]
+  "AgentMCPPackageTests-arm64-apple-macosx-debug.module": ["<AgentMCPPackageTests-arm64-apple-macosx-debug.module>"]
+  "AgentMCPPackageTests-arm64-apple-macosx-debug.test": ["<AgentMCPPackageTests-arm64-apple-macosx-debug.test>"]
+  "AgentMCPTests-arm64-apple-macosx-debug.module": ["<AgentMCPTests-arm64-apple-macosx-debug.module>"]
+  "PackageStructure": ["<PackageStructure>"]
+  "TestClient-arm64-apple-macosx-debug.exe": ["<TestClient-arm64-apple-macosx-debug.exe>"]
+  "TestClient-arm64-apple-macosx-debug.module": ["<TestClient-arm64-apple-macosx-debug.module>"]
+  "main": ["<AgentMCP-arm64-apple-macosx-debug.module>","<TestClient-arm64-apple-macosx-debug.exe>","<TestClient-arm64-apple-macosx-debug.module>"]
+  "test": ["<AgentMCP-arm64-apple-macosx-debug.module>","<AgentMCPPackageTests-arm64-apple-macosx-debug.test>","<AgentMCPTests-arm64-apple-macosx-debug.module>","<TestClient-arm64-apple-macosx-debug.exe>","<TestClient-arm64-apple-macosx-debug.module>"]
+default: "main"
+nodes:
+  "/private/tmp/AgentMCP/Sources/AgentMCP/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/private/tmp/AgentMCP/Sources/TestClient/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/private/tmp/AgentMCP/Tests/AgentMCPTests/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient":
+    is-mutated: true
+commands:
+  "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/private/tmp/AgentMCP/Sources/AgentMCP/HTTPConnection.swift","/private/tmp/AgentMCP/Sources/AgentMCP/JSONValue.swift","/private/tmp/AgentMCP/Sources/AgentMCP/MCPClient.swift","/private/tmp/AgentMCP/Sources/AgentMCP/MCPClientError.swift","/private/tmp/AgentMCP/Sources/AgentMCP/MCPConnection.swift","/private/tmp/AgentMCP/Sources/AgentMCP/ServerManager.swift","/private/tmp/AgentMCP/Sources/AgentMCP/StdioConnection.swift"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/sources"]
+    description: "Write auxiliary file /private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/sources"
+
+  "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.derived/runner.swift"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/sources"]
+    description: "Write auxiliary file /private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/sources"
+
+  "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.derived/runner.swift":
+    tool: test-entry-point-tool
+    inputs: []
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.derived/runner.swift"]
+
+  "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/HTTPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/JSONValue.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClient.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClientError.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/ServerManager.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/StdioConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/runner.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/HTTPConnectionTests.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/MCPClientTests.swift.o"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.product/Objects.LinkFileList"
+
+  "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/private/tmp/AgentMCP/Tests/AgentMCPTests/HTTPConnectionTests.swift","/private/tmp/AgentMCP/Tests/AgentMCPTests/MCPClientTests.swift"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/sources"]
+    description: "Write auxiliary file /private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/sources"
+
+  "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient-entitlement.plist":
+    tool: write-auxiliary-file
+    inputs: ["<entitlement-plist>","<com.apple.security.get-task-allow>"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient-entitlement.plist"]
+    description: "Write auxiliary file /private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient-entitlement.plist"
+
+  "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/private/tmp/AgentMCP/Sources/TestClient/main.swift"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.build/sources"]
+    description: "Write auxiliary file /private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.build/sources"
+
+  "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/HTTPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/JSONValue.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClient.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClientError.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/ServerManager.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/StdioConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.build/main.swift.o"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.product/Objects.LinkFileList"
+
+  "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+
+  "<AgentMCP-arm64-apple-macosx-debug.module>":
+    tool: phony
+    inputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/HTTPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/JSONValue.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClient.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClientError.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/ServerManager.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/StdioConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCP.swiftmodule"]
+    outputs: ["<AgentMCP-arm64-apple-macosx-debug.module>"]
+
+  "<AgentMCPPackageTests-arm64-apple-macosx-debug.module>":
+    tool: phony
+    inputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/runner.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCPPackageTests.swiftmodule"]
+    outputs: ["<AgentMCPPackageTests-arm64-apple-macosx-debug.module>"]
+
+  "<AgentMCPPackageTests-arm64-apple-macosx-debug.test>":
+    tool: phony
+    inputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.xctest/Contents/MacOS/AgentMCPPackageTests"]
+    outputs: ["<AgentMCPPackageTests-arm64-apple-macosx-debug.test>"]
+
+  "<AgentMCPTests-arm64-apple-macosx-debug.module>":
+    tool: phony
+    inputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/HTTPConnectionTests.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/MCPClientTests.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCPTests.swiftmodule"]
+    outputs: ["<AgentMCPTests-arm64-apple-macosx-debug.module>"]
+
+  "<TestClient-arm64-apple-macosx-debug.exe>":
+    tool: phony
+    inputs: ["<TestClient-arm64-apple-macosx-debug.exe-CodeSigning>"]
+    outputs: ["<TestClient-arm64-apple-macosx-debug.exe>"]
+
+  "<TestClient-arm64-apple-macosx-debug.module>":
+    tool: phony
+    inputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.build/main.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/TestClient.swiftmodule"]
+    outputs: ["<TestClient-arm64-apple-macosx-debug.module>"]
+
+  "C.AgentMCP-arm64-apple-macosx-debug.module":
+    tool: shell
+    inputs: ["/private/tmp/AgentMCP/Sources/AgentMCP/HTTPConnection.swift","/private/tmp/AgentMCP/Sources/AgentMCP/JSONValue.swift","/private/tmp/AgentMCP/Sources/AgentMCP/MCPClient.swift","/private/tmp/AgentMCP/Sources/AgentMCP/MCPClientError.swift","/private/tmp/AgentMCP/Sources/AgentMCP/MCPConnection.swift","/private/tmp/AgentMCP/Sources/AgentMCP/ServerManager.swift","/private/tmp/AgentMCP/Sources/AgentMCP/StdioConnection.swift","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/sources"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/HTTPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/JSONValue.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClient.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClientError.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/ServerManager.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/StdioConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCP.swiftmodule"]
+    description: "Compiling Swift Module 'AgentMCP' (7 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","AgentMCP","-emit-dependencies","-emit-module","-emit-module-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCP.swiftmodule","-output-file-map","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/output-file-map.json","-parse-as-library","-incremental","-c","@/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/sources","-I","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx26.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j10","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-parse-as-library","-emit-objc-header","-emit-objc-header-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/include/AgentMCP-Swift.h","-swift-version","6","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","agentmcp"]
+
+  "C.AgentMCPPackageTests-arm64-apple-macosx-debug.module":
+    tool: shell
+    inputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.derived/runner.swift","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCPTests.swiftmodule","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/sources"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/runner.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCPPackageTests.swiftmodule"]
+    description: "Compiling Swift Module 'AgentMCPPackageTests' (1 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","AgentMCPPackageTests","-emit-dependencies","-emit-module","-emit-module-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCPPackageTests.swiftmodule","-output-file-map","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/output-file-map.json","-parse-as-library","-incremental","-c","@/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/sources","-I","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx26.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-Xfrontend","-enable-cross-import-overlays","-j10","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-parse-as-library","-emit-objc-header","-emit-objc-header-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/include/AgentMCPPackageTests-Swift.h","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","agentmcp"]
+
+  "C.AgentMCPPackageTests-arm64-apple-macosx-debug.test":
+    tool: shell
+    inputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/HTTPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/JSONValue.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClient.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClientError.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/ServerManager.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/StdioConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.build/runner.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/HTTPConnectionTests.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/MCPClientTests.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.product/Objects.LinkFileList"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.xctest/Contents/MacOS/AgentMCPPackageTests"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/AgentMCPPackageTests.xctest/Contents/MacOS/AgentMCPPackageTests"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-L","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug","-o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.xctest/Contents/MacOS/AgentMCPPackageTests","-module-name","AgentMCPPackageTests","-Xlinker","-no_warn_duplicate_libraries","-Xlinker","-bundle","-Xlinker","-rpath","-Xlinker","@loader_path/../../../","@/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPPackageTests.product/Objects.LinkFileList","-target","arm64-apple-macosx26.0","-Xlinker","-add_ast_path","-Xlinker","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCP.swiftmodule","-Xlinker","-add_ast_path","-Xlinker","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCPPackageTests.swiftmodule","-Xlinker","-add_ast_path","-Xlinker","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCPTests.swiftmodule","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g"]
+
+  "C.AgentMCPTests-arm64-apple-macosx-debug.module":
+    tool: shell
+    inputs: ["/private/tmp/AgentMCP/Tests/AgentMCPTests/HTTPConnectionTests.swift","/private/tmp/AgentMCP/Tests/AgentMCPTests/MCPClientTests.swift","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCP.swiftmodule","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/sources"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/HTTPConnectionTests.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/MCPClientTests.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCPTests.swiftmodule"]
+    description: "Compiling Swift Module 'AgentMCPTests' (2 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","AgentMCPTests","-emit-dependencies","-emit-module","-emit-module-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCPTests.swiftmodule","-output-file-map","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/output-file-map.json","-parse-as-library","-incremental","-c","@/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCPTests.build/sources","-I","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx26.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-Xfrontend","-enable-cross-import-overlays","-j10","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-parse-as-library","-swift-version","6","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","agentmcp"]
+
+  "C.TestClient-arm64-apple-macosx-debug.exe":
+    tool: shell
+    inputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/HTTPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/JSONValue.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClient.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClientError.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/ServerManager.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/StdioConnection.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.build/main.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.product/Objects.LinkFileList"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/TestClient"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-L","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug","-o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient","-module-name","TestClient","-Xlinker","-no_warn_duplicate_libraries","-emit-executable","-Xlinker","-alias","-Xlinker","_TestClient_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.product/Objects.LinkFileList","-target","arm64-apple-macosx26.0","-Xlinker","-add_ast_path","-Xlinker","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCP.swiftmodule","-Xlinker","-add_ast_path","-Xlinker","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/TestClient.swiftmodule","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g"]
+
+  "C.TestClient-arm64-apple-macosx-debug.exe-entitlements":
+    tool: shell
+    inputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient-entitlement.plist"]
+    outputs: ["<TestClient-arm64-apple-macosx-debug.exe-CodeSigning>"]
+    description: "Applying debug entitlements to ./.build/arm64-apple-macosx/debug/TestClient"
+    args: ["codesign","--force","--sign","-","--entitlements","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient-entitlement.plist","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient"]
+
+  "C.TestClient-arm64-apple-macosx-debug.module":
+    tool: shell
+    inputs: ["/private/tmp/AgentMCP/Sources/TestClient/main.swift","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/AgentMCP.swiftmodule","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.build/sources"]
+    outputs: ["/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.build/main.swift.o","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/TestClient.swiftmodule"]
+    description: "Compiling Swift Module 'TestClient' (1 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","TestClient","-emit-dependencies","-emit-module","-emit-module-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules/TestClient.swiftmodule","-output-file-map","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.build/output-file-map.json","-incremental","-c","@/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/TestClient.build/sources","-I","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx26.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j10","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","TestClient_main","-swift-version","6","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","agentmcp"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/private/tmp/AgentMCP/Sources/AgentMCP/","/private/tmp/AgentMCP/Sources/TestClient/","/private/tmp/AgentMCP/Tests/AgentMCPTests/","/private/tmp/AgentMCP/Package.swift","/private/tmp/AgentMCP/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+

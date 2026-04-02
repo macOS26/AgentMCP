@@ -1,0 +1,54 @@
+{
+  "": {
+    "swift-dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/primary.swiftdeps"
+  },
+  "/private/tmp/AgentMCP/Sources/AgentMCP/HTTPConnection.swift": {
+    "dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/HTTPConnection.d",
+    "object": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/HTTPConnection.swift.o",
+    "swiftmodule": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/HTTPConnection~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/HTTPConnection.swiftdeps",
+    "diagnostics": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/HTTPConnection.dia"
+  },
+  "/private/tmp/AgentMCP/Sources/AgentMCP/JSONValue.swift": {
+    "dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/JSONValue.d",
+    "object": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/JSONValue.swift.o",
+    "swiftmodule": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/JSONValue~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/JSONValue.swiftdeps",
+    "diagnostics": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/JSONValue.dia"
+  },
+  "/private/tmp/AgentMCP/Sources/AgentMCP/MCPClient.swift": {
+    "dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClient.d",
+    "object": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClient.swift.o",
+    "swiftmodule": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClient~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClient.swiftdeps",
+    "diagnostics": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClient.dia"
+  },
+  "/private/tmp/AgentMCP/Sources/AgentMCP/MCPClientError.swift": {
+    "dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClientError.d",
+    "object": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClientError.swift.o",
+    "swiftmodule": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClientError~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClientError.swiftdeps",
+    "diagnostics": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPClientError.dia"
+  },
+  "/private/tmp/AgentMCP/Sources/AgentMCP/MCPConnection.swift": {
+    "dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPConnection.d",
+    "object": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPConnection.swift.o",
+    "swiftmodule": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPConnection~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPConnection.swiftdeps",
+    "diagnostics": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/MCPConnection.dia"
+  },
+  "/private/tmp/AgentMCP/Sources/AgentMCP/ServerManager.swift": {
+    "dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/ServerManager.d",
+    "object": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/ServerManager.swift.o",
+    "swiftmodule": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/ServerManager~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/ServerManager.swiftdeps",
+    "diagnostics": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/ServerManager.dia"
+  },
+  "/private/tmp/AgentMCP/Sources/AgentMCP/StdioConnection.swift": {
+    "dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/StdioConnection.d",
+    "object": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/StdioConnection.swift.o",
+    "swiftmodule": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/StdioConnection~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/StdioConnection.swiftdeps",
+    "diagnostics": "/private/tmp/AgentMCP/.build/arm64-apple-macosx/debug/AgentMCP.build/StdioConnection.dia"
+  }
+}
