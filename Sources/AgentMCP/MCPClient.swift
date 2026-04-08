@@ -195,6 +195,21 @@ public actor MCPClient {
             connection = try launchServer(config)
         }
         connections[config.id] = connection
+
+        // Legacy HTTP+SSE servers must complete the GET-stream handshake
+        // and receive an `endpoint` event BEFORE the first JSON-RPC POST.
+        // Modern Streamable HTTP connections don't need this — they POST
+        // initialize directly. Do the handshake here so the rest of the
+        // initialize flow below is identical for both transports.
+        if let legacy = connection as? LegacyHTTPSSEConnection {
+            do {
+                try await legacy.connectAndDiscoverEndpoint()
+            } catch {
+                connection.disconnect()
+                connections.removeValue(forKey: config.id)
+                throw error
+            }
+        }
         configs[config.id] = config
 
         // Wrap initialization in a 90-second timeout
@@ -431,7 +446,7 @@ public actor MCPClient {
         )
     }
 
-    private func connectHTTP(_ config: ServerConfig) throws -> HTTPConnection {
+    private func connectHTTP(_ config: ServerConfig) throws -> any MCPConnection {
         guard let urlString = config.url, !urlString.isEmpty else {
             throw MCPClientError.connectionFailed("No URL specified for HTTP server")
         }
@@ -447,6 +462,25 @@ public actor MCPClient {
             guard host == "localhost" || host == "127.0.0.1" || host == "::1" else {
                 throw MCPClientError.connectionFailed("Plain HTTP only allowed for localhost. Use HTTPS for remote servers.")
             }
+        }
+        // Auto-detect transport variant. Servers using the LEGACY MCP
+        // HTTP+SSE transport (MCP spec 2024-11-05, used by Z.AI's MCP web
+        // search and the original Python SDK) expose a URL whose path ends
+        // in `/sse` — that endpoint is GET-only and emits an `endpoint`
+        // event over SSE that points at the message URL. Modern Streamable
+        // HTTP servers (MCP spec 2025-03-26) accept POST JSON-RPC directly
+        // on a single endpoint.
+        //
+        // Detection rule: if the path component (ignoring trailing slash
+        // and query string) ends in `/sse`, use the legacy transport.
+        // Otherwise default to Streamable HTTP. The legacy transport can
+        // also be forced by setting `sseEndpoint` explicitly to a non-empty
+        // value, since that field has no meaning under Streamable HTTP.
+        let pathComponent = url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let pathEndsInSSE = pathComponent.hasSuffix("/sse") || pathComponent == "sse"
+        let explicitLegacy = (config.sseEndpoint?.isEmpty == false)
+        if pathEndsInSSE || explicitLegacy {
+            return LegacyHTTPSSEConnection(url: url, headers: config.headers)
         }
         return HTTPConnection(url: url, headers: config.headers, sseEndpoint: config.sseEndpoint, httpEndpoint: config.httpEndpoint)
     }
