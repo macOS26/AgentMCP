@@ -43,7 +43,18 @@ final class LegacyHTTPSSEConnection: @unchecked Sendable, MCPConnection {
 
     private let sseURL: URL
     private let customHeaders: [String: String]
-    private let session: URLSession
+    /// URLSession used ONLY for the long-lived SSE GET stream. Configured
+    /// with a delegate so bytes are pushed via `urlSession(_:dataTask:didReceive:)`
+    /// the moment they arrive — `URLSession.bytes(for:)` would buffer
+    /// chunks indefinitely on quiet streams (verified against Z.AI: small
+    /// initialize responses arrive instantly, but a 3KB tools/list response
+    /// gets held back until the buffer fills). Delegate-based reading
+    /// bypasses that buffering entirely.
+    private let sseSession: URLSession
+    private let sseDelegate: SSEStreamDelegate
+    /// Separate URLSession for outbound POSTs so HTTP/2 multiplexing on the
+    /// SSE stream can't interfere with message sending.
+    private let postSession: URLSession
     private let logger = Logger(subsystem: "AgentMCP", category: "LegacyHTTPSSE")
 
     private struct State {
@@ -54,6 +65,11 @@ final class LegacyHTTPSSEConnection: @unchecked Sendable, MCPConnection {
         var pending: [Int: CheckedContinuation<[String: Any], Error>] = [:]
         /// Continuation that wakes up when the first `endpoint` event arrives.
         var endpointContinuation: CheckedContinuation<URL, Error>?
+        /// Set if the SSE reader received the endpoint event BEFORE
+        /// `connectAndDiscoverEndpoint` registered its continuation. The
+        /// caller checks this on registration so the event is never lost
+        /// to a races between the spawn-task-then-register sequence.
+        var pendingEndpoint: URL?
         var nextId: Int = 0
         var alive: Bool = true
     }
@@ -67,15 +83,20 @@ final class LegacyHTTPSSEConnection: @unchecked Sendable, MCPConnection {
     init(url: URL, headers: [String: String]) {
         self.sseURL = url
         self.customHeaders = headers
-        let config = URLSessionConfiguration.default
-        // The SSE stream is intentionally long-lived. Bump the per-resource
-        // timeout into hours; without this URLSession will tear the stream
-        // down after the default 7 days but URLSession.bytes will throw
-        // when the request-side timeout fires (180s default). Set both
-        // generous values so the stream survives quiet periods.
-        config.timeoutIntervalForRequest = 600
-        config.timeoutIntervalForResource = 86400
-        self.session = URLSession(configuration: config)
+        // Long-lived SSE stream — bump both timeouts so quiet periods don't
+        // tear the connection down.
+        let sseConfig = URLSessionConfiguration.ephemeral
+        sseConfig.timeoutIntervalForRequest = 600
+        sseConfig.timeoutIntervalForResource = 86400
+        let delegate = SSEStreamDelegate()
+        self.sseDelegate = delegate
+        self.sseSession = URLSession(configuration: sseConfig, delegate: delegate, delegateQueue: nil)
+        // POSTs use a separate session so they can't get muxed onto the
+        // same HTTP/2 connection as the SSE stream and cause head-of-line
+        // blocking on the response side.
+        let postConfig = URLSessionConfiguration.ephemeral
+        postConfig.timeoutIntervalForRequest = 60
+        self.postSession = URLSession(configuration: postConfig)
     }
 
     var isAlive: Bool { state.withLock { $0.alive } }
@@ -89,10 +110,22 @@ final class LegacyHTTPSSEConnection: @unchecked Sendable, MCPConnection {
             await self?.runSSEStream()
         }
 
-        // Wait up to 30 seconds for the endpoint to be discovered.
+        // Wait for the endpoint event. Race-safe: the SSE reader may have
+        // ALREADY received and stashed `pendingEndpoint` before we get
+        // here, so the registration step checks for it and resumes
+        // immediately if so. Otherwise we register the continuation and
+        // the SSE reader will resume it when the event arrives.
         let endpointURL: URL = try await withCheckedThrowingContinuation { continuation in
-            state.withLock { state in
+            let immediate: URL? = state.withLock { state in
+                if let pending = state.pendingEndpoint {
+                    state.pendingEndpoint = nil
+                    return pending
+                }
                 state.endpointContinuation = continuation
+                return nil
+            }
+            if let immediate {
+                continuation.resume(returning: immediate)
             }
         }
 
@@ -111,57 +144,83 @@ final class LegacyHTTPSSEConnection: @unchecked Sendable, MCPConnection {
             request.setValue(value, forHTTPHeaderField: key)
         }
 
-        do {
-            let (bytes, response) = try await session.bytes(for: request)
-            guard let httpResponse = response as? HTTPURLResponse else {
-                fail(MCPClientError.connectionFailed("Invalid HTTP response from SSE endpoint"))
-                return
+        // Wire the delegate to forward bytes into our parser. Using a
+        // URLSessionDataDelegate (rather than URLSession.bytes) is the
+        // ONLY way to get bytes pushed as soon as they arrive — bytes()
+        // buffers chunks until enough data has accumulated, which makes
+        // long-lived SSE streams stall waiting for events that have
+        // already been written to the wire by the server.
+        sseDelegate.onBytes = { [weak self] data in
+            self?.feedSSEBytes(data)
+        }
+        sseDelegate.onComplete = { [weak self] error in
+            if let error {
+                self?.fail(error)
+            } else {
+                self?.fail(MCPClientError.connectionFailed("SSE stream closed by server"))
             }
-            guard (200..<300).contains(httpResponse.statusCode) else {
-                fail(MCPClientError.connectionFailed("SSE endpoint returned HTTP \(httpResponse.statusCode)"))
-                return
-            }
+        }
 
-            // Parse the stream line by line. Per the SSE spec, an event is
-            // delimited by a blank line. Each event accumulates `event:` and
-            // one or more `data:` lines.
-            var currentEvent = ""
-            var currentData = ""
+        let task = sseSession.dataTask(with: request)
+        task.resume()
+    }
 
-            for try await line in bytes.lines {
-                // Stop reading if disconnected.
-                if !isAlive { break }
+    /// SSE parser state — owned by the connection, fed by the delegate one
+    /// chunk at a time. Kept as instance properties so the parser is
+    /// stateful across multiple delegate callbacks.
+    private var parserCurrentEvent = ""
+    private var parserCurrentData = ""
+    private var parserLineBuffer = Data()
+    private let parserLock = OSAllocatedUnfairLock(initialState: ())
+
+    /// Process a chunk of bytes pushed by the SSE delegate. The same
+    /// byte-level event-detection logic that worked in the bytes-iterator
+    /// version, just driven by chunks instead of an `await` loop.
+    private func feedSSEBytes(_ data: Data) {
+        // Parse inside the lock and return the list of complete events to
+        // dispatch outside the lock. Holding the parser lock across the
+        // dispatch boundary risks deadlock with the connection state lock.
+        let eventsToDispatch: [(String, String)] = parserLock.withLock { _ -> [(String, String)] in
+            var events: [(String, String)] = []
+            for byte in data {
+                if byte == 0x0D { continue }  // strip CR
+                if byte != 0x0A {
+                    parserLineBuffer.append(byte)
+                    continue
+                }
+
+                let line = String(data: parserLineBuffer, encoding: .utf8) ?? ""
+                parserLineBuffer.removeAll(keepingCapacity: true)
 
                 if line.isEmpty {
-                    // Event boundary — dispatch what we've collected.
-                    if !currentData.isEmpty {
-                        handleSSEEvent(eventType: currentEvent, data: currentData)
+                    // Blank line — event delimiter.
+                    if !parserCurrentData.isEmpty || !parserCurrentEvent.isEmpty {
+                        events.append((parserCurrentEvent, parserCurrentData))
+                        parserCurrentEvent = ""
+                        parserCurrentData = ""
                     }
-                    currentEvent = ""
-                    currentData = ""
                     continue
                 }
-                if line.hasPrefix(":") {
-                    // SSE comment / keep-alive — ignore.
-                    continue
-                }
+                if line.hasPrefix(":") { continue }  // SSE comment
                 if line.hasPrefix("event:") {
-                    currentEvent = String(line.dropFirst(6)).trimmingCharacters(in: .whitespaces)
+                    parserCurrentEvent = String(line.dropFirst(6)).trimmingCharacters(in: .whitespaces)
                     continue
                 }
                 if line.hasPrefix("data:") {
                     let chunk = String(line.dropFirst(5)).trimmingCharacters(in: .whitespaces)
-                    currentData = currentData.isEmpty ? chunk : currentData + "\n" + chunk
+                    parserCurrentData = parserCurrentData.isEmpty ? chunk : parserCurrentData + "\n" + chunk
                     continue
                 }
-                // Ignore "id:", "retry:" and any other field per spec.
+                // Ignore id:, retry:, and any other field per spec.
             }
-
-            // Stream ended cleanly — fail any in-flight requests so callers
-            // don't hang waiting for a response that will never arrive.
-            fail(MCPClientError.connectionFailed("SSE stream closed by server"))
-        } catch {
-            fail(error)
+            return events
+        }
+        // Dispatch events synchronously on the delegate queue (already a
+        // background queue from URLSession). Avoids queue-hop overhead and
+        // lifetime concerns of jumping to global() while the connection
+        // might be tearing down.
+        for (ev, dt) in eventsToDispatch {
+            handleSSEEvent(eventType: ev, data: dt)
         }
     }
 
@@ -186,11 +245,18 @@ final class LegacyHTTPSSEConnection: @unchecked Sendable, MCPConnection {
                 fail(MCPClientError.connectionFailed("Server sent invalid endpoint URL: \(data)"))
                 return
             }
-            // Wake up connectAndDiscoverEndpoint().
+            // Wake up connectAndDiscoverEndpoint() if it's already waiting,
+            // OR stash the URL in state so the upcoming registration picks
+            // it up immediately. The race exists because we spawn the SSE
+            // task BEFORE registering the continuation, and Z.AI sends the
+            // endpoint event in <1s.
             let cont = state.withLock { state -> CheckedContinuation<URL, Error>? in
-                let c = state.endpointContinuation
-                state.endpointContinuation = nil
-                return c
+                if let c = state.endpointContinuation {
+                    state.endpointContinuation = nil
+                    return c
+                }
+                state.pendingEndpoint = resolved
+                return nil
             }
             cont?.resume(returning: resolved)
 
@@ -290,7 +356,7 @@ final class LegacyHTTPSSEConnection: @unchecked Sendable, MCPConnection {
                 request.setValue(value, forHTTPHeaderField: key)
             }
 
-            let task = session.dataTask(with: request) { [weak self] _, response, error in
+            let task = postSession.dataTask(with: request) { [weak self] _, response, error in
                 // If the POST itself fails (network error, non-2xx status)
                 // we have to clean up the pending continuation here — the
                 // SSE side will never deliver a response.
@@ -307,7 +373,7 @@ final class LegacyHTTPSSEConnection: @unchecked Sendable, MCPConnection {
                     )
                     return
                 }
-                // 202 Accepted — wait for the SSE response.
+                // 200/202 — wait for the SSE response.
             }
             task.resume()
         }
@@ -335,7 +401,7 @@ final class LegacyHTTPSSEConnection: @unchecked Sendable, MCPConnection {
         }
 
         // Fire-and-forget — notifications never receive a response.
-        let task = session.dataTask(with: request)
+        let task = postSession.dataTask(with: request)
         task.resume()
     }
 
@@ -343,7 +409,8 @@ final class LegacyHTTPSSEConnection: @unchecked Sendable, MCPConnection {
         sseTask?.cancel()
         sseTask = nil
         fail(MCPClientError.connectionFailed("Legacy HTTP+SSE connection closed by client"))
-        session.invalidateAndCancel()
+        sseSession.invalidateAndCancel()
+        postSession.invalidateAndCancel()
     }
 
     // MARK: - Helpers
@@ -360,5 +427,26 @@ final class LegacyHTTPSSEConnection: @unchecked Sendable, MCPConnection {
             state.pending.removeValue(forKey: id)
         }
         cont?.resume(throwing: error)
+    }
+}
+
+// MARK: - SSE Stream Delegate
+
+/// URLSessionDataDelegate that pushes incoming bytes to a callback the
+/// moment they arrive — bypassing URLSession.bytes(for:)'s internal
+/// buffering. Required for long-lived MCP HTTP+SSE streams where the
+/// server emits a few KB and then waits for the client to POST.
+final class SSEStreamDelegate: NSObject, URLSessionDataDelegate, @unchecked Sendable {
+    /// Called for every chunk of bytes the server pushes.
+    var onBytes: ((Data) -> Void)?
+    /// Called once when the stream ends (cleanly or with an error).
+    var onComplete: ((Error?) -> Void)?
+
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        onBytes?(data)
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        onComplete?(error)
     }
 }
