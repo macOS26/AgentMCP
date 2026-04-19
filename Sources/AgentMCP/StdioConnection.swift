@@ -24,15 +24,28 @@ final class StdioConnection: @unchecked Sendable, MCPConnection {
         self.reader = reader
         self.errorReader = errorReader
 
-        // Drain stderr to prevent the server from blocking on a full pipe (64 KB OS limit)
+        // Drain stderr to prevent the server from blocking on a full pipe (64 KB OS limit).
+        // On EOF (child exited / pipe closed), availableData returns empty Data; if we
+        // don't clear the handler, the dispatch source fires in a tight loop forever,
+        // burning ~100% CPU per pipe. Same pattern on the reader below.
         errorReader.readabilityHandler = { handle in
-            _ = handle.availableData
+            let data = handle.availableData
+            if data.isEmpty {
+                handle.readabilityHandler = nil
+            }
         }
 
         // Set up non-blocking read via readabilityHandler
         reader.readabilityHandler = { [weak self] handle in
             let data = handle.availableData
-            guard !data.isEmpty, let self else { return }
+            if data.isEmpty {
+                handle.readabilityHandler = nil
+                return
+            }
+            guard let self else {
+                handle.readabilityHandler = nil
+                return
+            }
 
             self.lock.lock()
             self.buffer.append(data)
